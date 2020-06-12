@@ -1,0 +1,166 @@
+" Vim with all enhancements
+source $VIMRUNTIME/vimrc_example.vim
+
+" Use the internal diff if available.
+" Otherwise use the special 'diffexpr' for Windows.
+if &diffopt !~# 'internal'
+  set diffexpr=MyDiff()
+endif
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg1 = substitute(arg1, '!', '\!', 'g')
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg2 = substitute(arg2, '!', '\!', 'g')
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let arg3 = substitute(arg3, '!', '\!', 'g')
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      if empty(&shellxquote)
+        let l:shxq_sav = ''
+        set shellxquote&
+      endif
+      let cmd = '"' . $VIMRUNTIME . '\diff"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  let cmd = substitute(cmd, '!', '\!', 'g')
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  if exists('l:shxq_sav')
+    let &shellxquote=l:shxq_sav
+  endif
+endfunction
+
+
+
+"显示方案
+set shortmess=atI	"不显示乌干达
+syntax enable
+syntax on	"语法高亮
+"set guifont=Courier_New:h10:cANSI
+"set guifont=Monospaces\ Bold\ 10 
+
+
+if has("win32") || has("win64")
+  set guifont=DejaVu_Sans_Mono:h10:cDEFAULT
+else
+  set guifont=monospace\ 12
+endif
+
+
+colorscheme darkblue	"配色方案
+set showmode	"显示模式
+set showcmd	"显示命令
+set nu	"显示行号
+set cursorcolumn	"高亮光标所在行列
+set cursorline
+let &termencoding=&encoding	"防止乱码
+set fileencodings=utf-8,gbk,ucs-bom,cp936
+set lines=30 columns=100	"设定窗口大小
+set mouse=a	"支持鼠标复制粘贴
+
+
+"个性化
+set tabstop=2	"tab代表2个空格键
+set shiftwidth=2  "换行时，交错使用2个空格
+set expandtab 
+set softtabstop=2
+set showmatch	"自动匹配括号
+set nobackup	"不创建备份文件
+set autoindent "设置自动对齐
+set smartindent
+set noai	"取消自动缩进和智能缩进
+set noci	"取消自动缩进和智能缩进
+set nosi	"取消自动缩进和智能缩进
+set hlsearch  "高亮显示查找结果
+set incsearch "增量查找
+set statusline=[%F]%y%r%m%*%=[Line:%l/%L,Column:%c][%p%%] "显示文件名：总行数，总的字符数
+set history=1000
+"set nowapfile
+set noundofile
+
+if version >= 603
+  set helplang=cn
+  set encoding=utf-8
+endif
+
+set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp963
+set termencoding=utf-8
+set encoding=utf-8
+set fileencodings=usc-bom,utf-8,cp963
+set fileencoding=utf-8
+
+
+"HDL assignment
+"插入文件头
+:ab headerhdl //=================================================<Enter>//Filename           :<Enter>//Created by         :liushang<Enter>//Author             :liushang<Enter>//Created On         :<c-r>=strftime("%Y-%m-%d %H:%M")<cr><Enter>//Last Modified      :<Enter>//Update Count       :<c-r>=strftime("%Y-%m-%d %H:%M")<cr><Enter>//version            :<Enter>//Email              :287699465@qq.com<Enter>//Description        :<Enter>//=================================================
+
+
+:ab module module#(<Enter><Enter>)<Enter>(<Enter><Enter>);<Enter>endmodule
+
+"时序块always
+:ab sx always @(posedge clk or negedge rst_n) begin<Enter>if(!rst_n) begin<Enter><Enter>end<Enter>else begin<Enter><Enter>end<Enter>end
+:ab sx1  always @(posedge clk) begin<Enter><Enter>end
+:ab sx2 always @(posedge clk or posedge  rst_n) begin<Enter>if(rst_n) begin<Enter><Enter>end<Enter>else begin<Enter><Enter>end<Enter>end
+:ab sx3 always @(negedge  clk or negedge rst_n) begin<Enter>if(!rst_n) begin<Enter><Enter>end<Enter>else begin<Enter><Enter>end<Enter>end
+:ab sx4 always @(negedge clk or posedge  rst_n) begin<Enter>if(rst_n) begin<Enter><Enter>end<Enter>else begin<Enter><Enter>end<Enter>end
+
+
+"组合块always
+:ab zh always @(*) begin<Enter><Enter>end
+
+:ab lx initial begin<Enter>  <Enter>end
+
+:ab zhushi /*-----------------------------------------------<Enter><Enter>-----------------------------------------------*/
+
+:ab tb_dve module ;<Enter>  reg    clk;<Enter>  reg    rst_n;<Enter><Enter><Enter>  parameter PERIOD = 20;<Enter><Enter><Enter>  initial begin<Enter>clk = 0;<Enter>forever<Enter>#(PERIOD/2) clk = ~clk;<Enter>  end<Enter><Enter><Enter>  initial begin<Enter><Enter>  $finish;<Enter>  end<Enter><Enter>  initial begin<Enter>$vcdpluson( );<Enter>  end<Enter><Enter>endmodule
+
+
+
+:ab tb_verdi module ;<Enter>  reg    clk;<Enter>  reg    rst_n;<Enter><Enter><Enter>  parameter PERIOD = 20;<Enter><Enter><Enter>  initial begin<Enter>clk = 0;<Enter>forever<Enter>#(PERIOD/2)<Enter>clk = ~clk;<Enter>end<Enter><Enter><Enter>initial begin<Enter><Enter>end<Enter><Enter>initial begin<Enter>$fsdbDumpfile(" .fsdb");<Enter>$fsdbDumpvars( );<Enter>end<Enter><Enter>endmodule
+
+":ab vpdpluson initial begin<Enter>$vcdpluson();<Enter>end
+
+":ab fsdbfile initial begin<Enter>$fsdbDumpfile("  ");<Enter>$fsdbDumpvars( );<Enter>end
+
+
+
+:ab output8  output[    7: 0]                            ;
+:ab output4  output[    3: 0]                            ;
+:ab output3  output[    2: 0]                            ;
+:ab output2  output[    1: 0]                            ;
+:ab output1  output                                      ;
+
+:ab input32 input [   31: 0]                             ;
+:ab input16 input [   15: 0]                             ;
+:ab input8  input [    7: 0]                             ;
+:ab input4  input [    3: 0]                             ;
+:ab input3  input [    2: 0]                             ;
+:ab input2  input [    1: 0]                             ;
+:ab input1  input                                        ;
+
+:ab wire32 wire  [   31: 0]                              ;
+:ab wire16 wire  [   15: 0]                              ;
+:ab wire8  wire  [    7: 0]                              ;
+:ab wire4  wire  [    3: 0]                              ;
+:ab wire3  wire  [    2: 0]                              ;
+:ab wire2  wire  [    1: 0]                              ;
+:ab wire1  wire                                          ;
+
+:ab reg32 reg   [   31: 0]                               ;
+:ab reg16 reg   [   15: 0]                               ;
+:ab reg8  reg   [    7: 0]                               ;
+:ab reg4  reg   [    3: 0]                               ;
+:ab reg3  reg   [    2: 0]                               ;
+:ab reg2  reg   [    1: 0]                               ;
+:ab reg1  reg                                            ;
+
+
